@@ -1,0 +1,23 @@
+{
+  "dataset_path": "/home/rohola/data/daily_dialog_full/daily_dialog.json" ,
+   "dataset_cache": "./daily_dialog_dataset_cache",
+   "model_checkpoint": "openai-gpt",
+   "num_candidates": 2,
+   "do_lower_case": true,
+   "max_history": 2,
+   "train_batch_size": 1,
+   "valid_batch_size": 1,
+   "gradient_accumulation_steps": 8,
+   "lr": 6.25e-5,
+   "warmup_proportion": 0.1,
+   "lm_coef": 1.0,
+   "mc_coef": 1.0,
+   "max_norm": 1.0,
+   "n_epochs": 3,
+   "personality_permutations":1,
+   "eval_before_start": false,
+   "device": "cpu",
+   "fp16": "",
+   "local_rank": -1,
+   "log_dir": ""
+}

@@ -1,0 +1,15 @@
+{
+   "dataset_path" : "/home/rohola/data/daily_dialog_full/daily_dialog.json",
+   "model" : "openai-gpt",
+   "dataset_cache" :  "./caches/dataset_cache_OpenAIGPTTokenizer",
+   "model_checkpoint" : "/home/rohola/codes/EmpTransfo/emp_transfo_checkpoint",
+   "max_history" : 2,
+   "device" : "cpu",
+   "no_sample" : true,
+   "max_length" : 20,
+   "min_length" : 1,
+   "seed" : 42,
+   "temperature" : 0.7,
+   "top_k" : 0,
+   "top_p" : 0.9
+}

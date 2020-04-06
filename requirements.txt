@@ -1,0 +1,9 @@
+torch
+pytorch-ignite
+#pytorch-pretrained-bert >= 0.6.2
+tensorboardX==1.6
+tensorflow  # for tensorboardX
+boto3
+requests
+tqdm
+regex
