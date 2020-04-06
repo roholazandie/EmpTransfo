@@ -33,15 +33,15 @@ from [here](https://drive.google.com/open?id=1T4AdY7wku8srL_xWSxgt-OHqdLFVo3s3).
 
 ## Training
 
-The script train_multihead.py uses three heads with all features. 
+The script [train_multihead.py](https://github.com/roholazandie/EmpTransfo/blob/master/train_multihead.py) uses three heads with all features. 
 
 
-The script train_full.py uses two heads (next sentence prediction and LM head), but uses all the features.
+The script [train_full.py](https://github.com/roholazandie/EmpTransfo/blob/master/train_full.py) uses two heads (next sentence prediction and LM head), but uses all the features.
 
 
-The script train_emotion_recognition.py trains to predict the next emotion (wihtout no_emotion).
+The script [train_emotion_recognition.py](https://github.com/roholazandie/EmpTransfo/blob/master/train_emotion_recognition.py) trains to predict the next emotion (wihtout no_emotion).
 
-The script train.py trains without any features of the dataset (the base model).
+The script [train.py](https://github.com/roholazandie/EmpTransfo/blob/master/train.py) trains without any features of the dataset (the base model).
 
 For all training scripts just change the dataset_path in config.json file related to that task, and then run the script
 without any arguments.
@@ -52,5 +52,10 @@ without any arguments.
 If you use this code in your research, you can cite our ANLP paper:
 
 ```
-
+@article{zandie2020emptransfo,
+  title={EmpTransfo: A Multi-head Transformer Architecture for Creating Empathetic Dialog Systems},
+  author={Zandie, Rohola and Mahoor, Mohammad H},
+  journal={arXiv preprint arXiv:2003.02958},
+  year={2020}
+}
 ```
