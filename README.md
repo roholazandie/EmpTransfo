@@ -52,10 +52,10 @@ without any arguments.
 If you use this code in your research, you can cite our ANLP paper:
 
 ```
-@article{zandie2020emptransfo,
+@inproceedings{zandie2020emptransfo,
   title={EmpTransfo: A Multi-head Transformer Architecture for Creating Empathetic Dialog Systems},
   author={Zandie, Rohola and Mahoor, Mohammad H},
-  journal={arXiv preprint arXiv:2003.02958},
+  booktitle={The Thirty-Third International Flairs Conference},
   year={2020}
 }
 ```
