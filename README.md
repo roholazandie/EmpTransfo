@@ -29,7 +29,7 @@ python interact.py
 ## Dataset
 The original daily dialog dataset is [here](https://www.aclweb.org/anthology/I17-1099/). We changed the format to our purpose and can be download
 from [here](https://drive.google.com/open?id=1T4AdY7wku8srL_xWSxgt-OHqdLFVo3s3). 
-
+If you want the dataset with topics you can download it [here](https://drive.google.com/file/d/17nL6q3eiG4IKAZe-CregN5db4eGkgz4G/view?usp=sharing)
 
 ## Training
 

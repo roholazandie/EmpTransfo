@@ -27,7 +27,7 @@ SPECIAL_TOKENS = ["<bos>", "<eos>", "<speaker1>", "<speaker2>",
 
                   "<no_emotion>", "<happiness>", "<surprise>", "<sadness>", "<disgust>", "<anger>", "<fear>",
 
-                 "<work>", "<finance>", "<relationship>", "<attitude_and_emotion>", "<culture_and_education>",
+                  "<work>", "<finance>", "<relationship>", "<attitude_and_emotion>", "<culture_and_education>",
                   "<school_life>", "<tourism>", "<ordinary_life>", "<politics>", "<health>",
 
                   "<directive>", "<inform>", "<commissive>", "<question>",
@@ -82,22 +82,24 @@ def build_input_from_segments(topic, history, emotions, actions, reply, candidat
     actions = [inform] + actions
 
     instance = {}
-    #sequence = [[bos] + history[0] + list(chain(*history[1:]))] + [reply + ([eos] if with_eos else [])] #seq = [personas, history, reply] concatenate all persona sentences
     sequence = [[bos] + [topic]] + history + [reply + ([eos] if with_eos else [])]
-    sequence = [[speaker2 if (len(sequence)-i) % 2 else speaker1] + s for i, s in enumerate(sequence)]
-
+    sequence = [[speaker2 if (len(sequence) - i) % 2 else speaker1] + s for i, s in enumerate(sequence)]
 
     instance["input_ids"] = list(chain(*sequence))
-    instance["token_type_ids"] = [speaker2 if i % 2 else speaker1 for i, s in enumerate(sequence) for _ in s] # the last for is for repeating the speaker1 and speaker2 for all tokens
-    instance["token_emotion_ids"] = [emotions[i] for i, s in enumerate(sequence[:-1]) for _ in s] + [candidate_emotion]*len(sequence[-1])
-    instance["token_action_ids"] = [actions[i] for i, s in enumerate(sequence[:-1]) for _ in s] + [canidate_act]*len(sequence[-1])
+    instance["token_type_ids"] = [speaker2 if i % 2 else speaker1 for i, s in enumerate(sequence) for _ in
+                                  s]  # the last for is for repeating the speaker1 and speaker2 for all tokens
+    instance["token_emotion_ids"] = [emotions[i] for i, s in enumerate(sequence[:-1]) for _ in s] + [
+        candidate_emotion] * len(sequence[-1])
+    instance["token_action_ids"] = [actions[i] for i, s in enumerate(sequence[:-1]) for _ in s] + [canidate_act] * len(
+        sequence[-1])
 
     instance["ec_token_ids"] = len(instance["input_ids"]) - 1
     instance["sc_token_ids"] = len(instance["input_ids"]) - 2
     instance["ec_labels"] = -1
     instance["lm_labels"] = [-1] * len(instance["input_ids"])
     if lm_labels:
-        instance["lm_labels"] = ([-1] * sum(len(s) for s in sequence[:-1])) + [-1] + sequence[-1][1:] #all -1 except for reply, reply is just the ids
+        instance["lm_labels"] = ([-1] * sum(len(s) for s in sequence[:-1])) + [-1] + sequence[-1][
+                                                                                     1:]  # all -1 except for reply, reply is just the ids
         instance["ec_labels"] = get_emotion_label(tokenizer, candidate_emotion)
     return instance, sequence
 
@@ -105,7 +107,6 @@ def build_input_from_segments(topic, history, emotions, actions, reply, candidat
 def get_data_loaders(config, tokenizer):
     """ Prepare the dataset for training and evaluation """
     personachat = get_dataset_for_daily_dialog(tokenizer, config.dataset_path, config.dataset_cache, SPECIAL_TOKENS)
-
 
     logger.info("Build inputs and labels")
     datasets = {"train": defaultdict(list), "valid": defaultdict(list)}
@@ -117,11 +118,12 @@ def get_data_loaders(config, tokenizer):
         for dialog in dataset:
             topic = dialog["topic"]
             for utterance in dialog["utterances"]:
-                history = utterance["history"][-(2 * config.max_history+1):]
+                history = utterance["history"][-(2 * config.max_history + 1):]
                 emotions = utterance["emotion"][-(2 * config.max_history + 1):]
-                actions = utterance["act"][-(2 * config.max_history+1):]
+                actions = utterance["act"][-(2 * config.max_history + 1):]
                 for j, candidate in enumerate(utterance["candidates"][-num_candidates:]):
-                    lm_labels = bool(j == num_candidates-1) #the true label is always the last one in list of candidates
+                    lm_labels = bool(
+                        j == num_candidates - 1)  # the true label is always the last one in list of candidates
                     candidate_emotion = utterance['candidates_emotions'][j]
                     candidate_act = utterance['candidates_acts'][j]
                     instance, _ = build_input_from_segments(topic, history, emotions, actions, candidate,
@@ -130,9 +132,9 @@ def get_data_loaders(config, tokenizer):
                     if len(instance["input_ids"]) > gpu_max_length:
                         truncated_history = [hist[:10] for hist in history]
                         truncated_candidate = candidate[:10]
-                        instance, _ = build_input_from_segments(topic, truncated_history, emotions, actions, truncated_candidate,
+                        instance, _ = build_input_from_segments(topic, truncated_history, emotions, actions,
+                                                                truncated_candidate,
                                                                 candidate_emotion, candidate_act, tokenizer, lm_labels)
-
 
                     for input_name, input_array in instance.items():
                         datasets[dataset_name][input_name].append(input_array)
@@ -171,7 +173,8 @@ def train():
 
     # logging is set to INFO (resp. WARN) for main (resp. auxiliary) process. logger.info => log main process only, logger.warning => log all processes
     logging.basicConfig(level=logging.INFO if config.local_rank in [-1, 0] else logging.WARN)
-    logger.warning("Running process %d", config.local_rank)  # This is a logger.warning: it will be printed by all distributed processes
+    logger.warning("Running process %d",
+                   config.local_rank)  # This is a logger.warning: it will be printed by all distributed processes
     logger.info("Arguments: %s", pformat(config))
 
     # Initialize distributed training if needed
@@ -204,12 +207,13 @@ def train():
     # Training function and trainer
     def update(engine, batch):
         model.train()
-        #input_ids, mc_token_ids, lm_labels, mc_labels, token_type_ids, token_emotion_ids, token_action_ids = tuple(input_tensor.to(config.device) for input_tensor in batch)
-        input_ids, ec_token_ids, sc_token_ids, lm_labels, ec_labels, sc_labels, token_type_ids, token_emotion_ids, token_action_ids = tuple(input_tensor.to(config.device) for input_tensor in batch)
+        # input_ids, mc_token_ids, lm_labels, mc_labels, token_type_ids, token_emotion_ids, token_action_ids = tuple(input_tensor.to(config.device) for input_tensor in batch)
+        input_ids, ec_token_ids, sc_token_ids, lm_labels, ec_labels, sc_labels, token_type_ids, token_emotion_ids, token_action_ids = tuple(
+            input_tensor.to(config.device) for input_tensor in batch)
 
         lm_loss, emotion_loss, sentence_loss = model(input_ids, ec_token_ids, sc_token_ids,
-                                      lm_labels, ec_labels, sc_labels, token_type_ids,
-                                      token_emotion_ids, token_action_ids)
+                                                     lm_labels, ec_labels, sc_labels, token_type_ids,
+                                                     token_emotion_ids, token_action_ids)
         loss = (lm_loss * config.lm_coef + emotion_loss * ec_coef + sentence_loss * sc_coef) / config.gradient_accumulation_steps
         if config.fp16:
             with amp.scale_loss(loss, optimizer) as scaled_loss:
@@ -222,6 +226,7 @@ def train():
             optimizer.step()
             optimizer.zero_grad()
         return loss.item()
+
     trainer = Engine(update)
 
     # Evaluation function and evaluator (evaluator output is the input of the metrics)
@@ -231,7 +236,7 @@ def train():
             batch = tuple(input_tensor.to(config.device) for input_tensor in batch)
             input_ids, ec_token_ids, sc_token_ids, lm_labels, ec_labels, \
             sc_labels, token_type_ids, token_emotion_ids, token_action_ids = batch
-            #logger.info(tokenizer.decode(input_ids[0, -1, :].tolist()))
+            # logger.info(tokenizer.decode(input_ids[0, -1, :].tolist()))
             model_outputs = model(input_ids, ec_token_ids, sc_token_ids, token_type_ids=token_type_ids,
                                   token_emotion_ids=token_emotion_ids,
                                   token_action_ids=token_action_ids)
@@ -239,6 +244,7 @@ def train():
             lm_logits_flat_shifted = lm_logits[..., :-1, :].contiguous().view(-1, lm_logits.size(-1))
             lm_labels_flat_shifted = lm_labels[..., 1:].contiguous().view(-1)
             return (lm_logits_flat_shifted, mc_logits), (lm_labels_flat_shifted, sc_labels)
+
     evaluator = Engine(inference)
 
     # Attach evaluation to trainer: we evaluate when we start the training and at the end of each epoch
@@ -271,15 +277,20 @@ def train():
     if config.local_rank in [-1, 0]:
         pbar = ProgressBar(persist=True)
         pbar.attach(trainer, metric_names=["loss"])
-        evaluator.add_event_handler(Events.COMPLETED, lambda _: pbar.log_message("Validation: %s" % pformat(evaluator.state.metrics)))
+        evaluator.add_event_handler(Events.COMPLETED,
+                                    lambda _: pbar.log_message("Validation: %s" % pformat(evaluator.state.metrics)))
 
         tb_logger = TensorboardLogger(log_dir=config.log_dir)
-        tb_logger.attach(trainer, log_handler=OutputHandler(tag="training", metric_names=["loss"]), event_name=Events.ITERATION_COMPLETED)
+        tb_logger.attach(trainer, log_handler=OutputHandler(tag="training", metric_names=["loss"]),
+                         event_name=Events.ITERATION_COMPLETED)
         tb_logger.attach(trainer, log_handler=OptimizerParamsHandler(optimizer), event_name=Events.ITERATION_STARTED)
-        tb_logger.attach(evaluator, log_handler=OutputHandler(tag="validation", metric_names=list(metrics.keys()), another_engine=trainer), event_name=Events.EPOCH_COMPLETED)
+        tb_logger.attach(evaluator, log_handler=OutputHandler(tag="validation", metric_names=list(metrics.keys()),
+                                                              another_engine=trainer),
+                         event_name=Events.EPOCH_COMPLETED)
 
         checkpoint_handler = ModelCheckpoint(tb_logger.writer.log_dir, 'checkpoint', save_interval=1, n_saved=3)
-        trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_handler, {'mymodel': getattr(model, 'module', model)})  # "getattr" take care of distributed encapsulation
+        trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_handler, {
+            'mymodel': getattr(model, 'module', model)})  # "getattr" take care of distributed encapsulation
 
         torch.save(config, tb_logger.writer.log_dir + '/model_training_args.bin')
         getattr(model, 'module', model).config.to_json_file(os.path.join(tb_logger.writer.log_dir, CONFIG_NAME))
@@ -290,8 +301,10 @@ def train():
 
     # On the main process: close tensorboard logger and rename the last checkpoint (for easy re-loading with OpenAIGPTModel.from_pretrained method)
     if config.local_rank in [-1, 0] and config.n_epochs > 0:
-        os.rename(checkpoint_handler._saved[-1][1][-1], os.path.join(tb_logger.writer.log_dir, WEIGHTS_NAME))  # TODO: PR in ignite to have better access to saved file paths (cleaner)
+        os.rename(checkpoint_handler._saved[-1][1][-1], os.path.join(tb_logger.writer.log_dir,
+                                                                     WEIGHTS_NAME))  # TODO: PR in ignite to have better access to saved file paths (cleaner)
         tb_logger.close()
+
 
 if __name__ == "__main__":
     train()
